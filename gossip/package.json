@@ -10,8 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
+    "crypto": "^1.0.1",
+    "jsonwebtoken": "^8.3.0",
     "koa": "^2.5.2",
     "koa-bodyparser": "^4.2.1",
+    "koa-jwt": "^3.5.0",
     "koa-router": "^7.4.0",
     "mongoose": "^5.2.12",
     "uuid": "^3.3.2"

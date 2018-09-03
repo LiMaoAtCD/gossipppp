@@ -4,7 +4,8 @@ const gossipSchema = new mongoose.Schema({
     "gossipId": { type: String, index: { unique: true, dropDups: true}, ref: 'user'},
     "title": String,
     "content": String,
-    "file": String
+    "file": String,
+    "status": Number
 })
 
 const model = mongoose.model('gossip', gossipSchema);
