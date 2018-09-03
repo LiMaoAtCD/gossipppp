@@ -18,7 +18,11 @@ class UserController {
                 let existUser = await usermodel.findOne({openid: res.data.openid})
                 if (existUser) {
                     existUser.openid = res.data.openid
-                    existUser.save()
+                    existUser.save(function (err) {
+                        if (err) {
+                            console.log(err)
+                        }
+                    })
                 } else {
                     let uid = uuid.v1();
                     var user = new usermodel({
@@ -38,7 +42,7 @@ class UserController {
     static async userInfo(ctx) {
         let openid = ctx.request.body.openid
         if (openid) {
-            var user = usermodel.findOne({openid: openid});
+            var user = await usermodel.findOne({openid: openid});
 
             if (ctx.request.body.nickname) {
                 user.nickname = ctx.request.body.nickname
@@ -49,39 +53,46 @@ class UserController {
             if (ctx.request.body.cellphone) {
                 user.cellphone = ctx.request.body.cellphone
             }
+            if (ctx.request.body.avatar) {
+                user.avatar = ctx.request.body.avatar
+            }
+            if (ctx.request.body.gender) {
+                user.gender = ctx.request.body.gender
+            }
+
             user.save()
             ctx.body = Result(200,"用户信息上传成功");
         } else {
-            ctx.body = Result(400,"openid 错误");
+            ctx.body = Result(400,"未获取到openid");
         }
     }
 
     static async getlist(ctx) {
         let query = ctx.request.query
         let openid = query.openid
-        let pageIndex = query.pageIndex
-        let pageSize = query.pageSize
-        if (openid) {
+        let pageNum = Number(query.pageNum)
+        let pageSize = Number(query.pageSize)
+
+        if (pageSize > 0 && pageNum > 0 && openid) {
             let user = usermodel.findOne({openid: openid})
             if (user) {
-                gossipmodel
-                    .find()
-                    .populate(user.userId)
-                    .skip(pageIndex * pageSize)
-                    .limit(pageSize)
-                    .exec(function (err, gossips) {
-                        if (err) {
-                            console.log("查询用户爆料列表失败: " + err)
-                            ctx.body = Result(400, "查询用户爆料列表失败")
-                        }  else {
-                            ctx.body = Result(200,"", gossips)
-                        }
-                })
+                try {
+                    let result = await gossipmodel
+                        .find()
+                        .populate("userId")
+                        .skip(pageNum * pageSize)
+                        .limit(pageSize)
+                        .exec()
+                    ctx.body = Result(200,"获取成功", result)
+                } catch (error) {
+                    console.log("查询用户爆料列表失败: " + error)
+                    ctx.body = Result(400, "查询用户爆料列表失败")
+                }
             } else {
                 ctx.body = Result(400, "未获取到用户");
             }
         } else {
-            ctx.body = Result(400, "openid 为空");
+            ctx.body = Result(400, "参数错误");
         }
     }
 
@@ -89,7 +100,7 @@ class UserController {
 
         let openid = ctx.request.body.openid
         if (openid) {
-            let user = usermodel.findOne({openid: openid})
+            let user = await usermodel.findOne({openid: openid})
             if (user) {
                 let title = ctx.request.body.title;
                 let content = ctx.request.body.content;
