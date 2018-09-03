@@ -54,14 +54,18 @@ class UserController {
     }
 
     static async getlist(ctx) {
-
-        let openid = ctx.request.body.openid
+        let query = ctx.request.query
+        let openid = query.openid
+        let pageIndex = query.pageIndex
+        let pageSize = query.pageSize
         if (openid) {
             let user = usermodel.findOne({openid: openid})
             if (user) {
                 gossipmodel
                     .find()
                     .populate(user.userId)
+                    .skip(pageIndex * pageSize)
+                    .limit(pageSize)
                     .exec(function (err, gossips) {
                         if (err) {
                             console.log("查询用户爆料列表失败: " + err)

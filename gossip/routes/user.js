@@ -7,7 +7,7 @@ userRouter.post('/login', userController.wxLogin);
 
 userRouter.post('/userInfo',userController.userInfo);
 
-userRouter.get('/list', userController.getlist);
+userRouter.get('/gossips/list', userController.getlist);
 
 userRouter.post("/upload",userController.upload);
 //
