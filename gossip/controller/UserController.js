@@ -3,32 +3,35 @@ const usermodel = require('../models/user')
 const gossipmodel = require('../models/gossip')
 const axios = require('axios')
 const uuid = require("uuid")
+const Result = require("../Utils/unionresult")
 
 class UserController {
     static async wxLogin(ctx) {
         let code = ctx.request.body.code;
         if( code ) {
             let urlToAuth = createWxLoginUrl( code )
-            let authRes = await axios.post(urlToAuth)
-            if (authRes.openid === undefined || authRes.errCode !== undefined) {
-                ctx.body = GossipJson(404, "微信认证失败" + authRes.errmsg).toJSON()
+            let res = await axios.post(urlToAuth)
+
+            if (res.data.openid === undefined || res.data.errCode !== undefined) {
+                ctx.body = Result(404, "微信认证失败" + res.data.errCode)
             } else {
-                let existUser = usermodel.findOne({_openid: authRes.openid})
+                let existUser = await usermodel.findOne({openid: res.data.openid})
                 if (existUser) {
-                    existUser.openid = authRes.openid
+                    existUser.openid = res.data.openid
                     existUser.save()
                 } else {
-                    let uuid = uuid.v1();
+                    let uid = uuid.v1();
                     var user = new usermodel({
-                        userId: uuid,
-                        openid: authRes.openid
+                        userId: uid,
+                        openid: res.data.openid
                     })
                     user.save()
                 }
-                ctx.body = GossipResult(200,"", authRes.openid).toJSON();
+                ctx.body = Result(200,"登录成功", res.data.openid);
+                console.log('登录成功')
             }
         } else {
-            ctx.body = GossipJson(400,"微信登录失败").toJSON();
+            ctx.body = Result(400,"微信登录失败");
         }
     }
 
@@ -47,9 +50,9 @@ class UserController {
                 user.cellphone = ctx.request.body.cellphone
             }
             user.save()
-            ctx.body = GossipResult(200,"用户信息上传成功","").toJSON();
+            ctx.body = Result(200,"用户信息上传成功");
         } else {
-            ctx.body = GossipJson(400,"openid 错误").toJSON();
+            ctx.body = Result(400,"openid 错误");
         }
     }
 
@@ -69,16 +72,16 @@ class UserController {
                     .exec(function (err, gossips) {
                         if (err) {
                             console.log("查询用户爆料列表失败: " + err)
-                            ctx.body = GossipJson(400, "查询用户爆料列表失败").toJSON()
+                            ctx.body = Result(400, "查询用户爆料列表失败")
                         }  else {
-                            ctx.body = GossipResult(200,"", gossips).toJSON()
+                            ctx.body = Result(200,"", gossips)
                         }
                 })
             } else {
-                ctx.body = GossipJson(400, "未获取到用户").toJSON();
+                ctx.body = Result(400, "未获取到用户");
             }
         } else {
-            ctx.body = GossipJson(400, "openid 为空").toJSON();
+            ctx.body = Result(400, "openid 为空");
         }
     }
 
@@ -99,13 +102,13 @@ class UserController {
                     file: file
                 })
                 gossip.save()
-                ctx.body = GossipJson(200,"创建成功").toJSON();
+                ctx.body = Result(200,"创建成功");
 
             } else {
-                ctx.body = GossipJson(400, "未获取到用户").toJSON();
+                ctx.body = Result(400, "未获取到用户");
             }
         } else {
-            ctx.body = GossipJson(400, "openid 为空").toJSON();
+            ctx.body = Result(400, "openid 为空");
         }
     }
 
@@ -118,7 +121,8 @@ module.exports = UserController
 
 function createWxLoginUrl(code) {
     let url = "https://api.weixin.qq.com/sns/jscode2session?" +
-        "appid=xxxxx&" + "secret=xxxxx&" + "grant_type=authorization_code&"
-    "js_code=" + code.toString()
+        "appid=wxc0f1cee1b76df4c7&" +
+        "secret=990a95bb587ed6566ded774aa07b612c&" +
+        "grant_type=authorization_code&" + "js_code=" + code.toString()
     return url
 }

@@ -1,22 +1,10 @@
-class GossipJson {
-    constructor (code, msg) {
-        this.msg = msg
-        this.code = code
-    }
-
-    toJson() {
-        return {"msg": this.msg, "code": this.code}
+const result = function (code, msg, data) {
+    if (data) {
+        return {"code": code, "msg": msg, "data": data}
+    } else {
+        return {"code": code, "msg": msg}
     }
 }
 
+module.exports = result
 
-class GossipResult extends GossipJson {
-    constructor (code, msg, result) {
-        super(code, msg)
-        this.result = result
-    }
-
-    toJson() {
-        return {"msg": this.msg, "code": this.code, "result": this.result}
-    }
-}
