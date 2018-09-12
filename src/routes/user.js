@@ -5,9 +5,9 @@ const userRouter = new koaRouter();
 
 userRouter.post('/login', userController.wxLogin);
 
-userRouter.post('/userInfo',userController.userInfo);
+userRouter.post('/updateUserInfo',userController.userInfo);
 
-userRouter.get('/gossips/list', userController.getlist);
+userRouter.get('/getMylist', userController.getlist);
 
 userRouter.post("/upload",userController.upload);
 //

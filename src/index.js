@@ -25,7 +25,7 @@ app.use(baseRouter.allowedMethods());
 
 
 
-mongoose.connect('mongodb://localhost:27017/gossip',{useNewUrlParser: true});
+mongoose.connect('mongodb://mongo:27017/gossip',{useNewUrlParser: true});
 let db = mongoose.connection;
 mongoose.set('useCreateIndex', true);
 db.on('error', console.error.bind(console, 'connection error:'));
