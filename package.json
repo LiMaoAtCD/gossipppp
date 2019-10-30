@@ -18,7 +18,7 @@
     "koa-jwt": "^3.5.0",
     "koa-router": "^7.4.0",
     "koa-static": "^5.0.0",
-    "mongoose": "^5.2.12",
+    "mongoose": "^5.7.5",
     "uuid": "^3.3.2"
   }
 }
